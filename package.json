@@ -1,0 +1,53 @@
+{
+  "name": "cerul",
+  "version": "0.1.0",
+  "description": "Official TypeScript SDK for the Cerul video search API",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "keywords": [
+    "cerul",
+    "video-search",
+    "ai-agent",
+    "api",
+    "mcp",
+    "video"
+  ],
+  "license": "MIT",
+  "homepage": "https://cerul.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cerul-ai/cerul-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cerul-ai/cerul-js/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "test": "tsx --test test/**/*.test.ts",
+    "prepublishOnly": "npm run clean && npm run build && npm run test"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
