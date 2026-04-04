@@ -157,6 +157,7 @@ async function requestJson<T>(
     const headers = new Headers(init.headers);
     headers.set("accept", "application/json");
     headers.set("authorization", `Bearer ${options.apiKey}`);
+    headers.set("x-cerul-client-source", "sdk-js");
     if (init.body && !headers.has("content-type")) {
       headers.set("content-type", "application/json");
     }
@@ -201,7 +202,7 @@ async function requestJson<T>(
       });
     } catch (error) {
       const cerulError = toCerulError(error);
-      if (attempt < MAX_RETRY_ATTEMPTS && options.retry && cerulError.status >= 500) {
+      if (attempt < MAX_RETRY_ATTEMPTS && options.retry && (cerulError.status === 0 || cerulError.status >= 500)) {
         await sleep(defaultBackoffDelay(attempt));
         continue;
       }

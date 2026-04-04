@@ -42,6 +42,7 @@ test("search sends the expected request payload", async () => {
   assert.ok(capturedRequest);
   assert.equal(capturedRequest?.url, "https://api.cerul.ai/v1/search");
   assert.equal(capturedRequest?.headers.get("authorization"), "Bearer cerul_sk_test");
+  assert.equal(capturedRequest?.headers.get("x-cerul-client-source"), "sdk-js");
 
   const payload = await capturedRequest?.json();
   assert.deepEqual(payload, {
@@ -77,13 +78,24 @@ test("usage retries on 500 when retry is enabled", async () => {
 
       return jsonResponse({
         tier: "free",
+        plan_code: "free",
         period_start: "2026-04-01",
         period_end: "2026-04-30",
         credits_limit: 0,
         credits_used: 3,
         credits_remaining: 7,
+        wallet_balance: 7,
+        credit_breakdown: {
+          included_remaining: 0,
+          bonus_remaining: 7,
+          paid_remaining: 0
+        },
+        expiring_credits: [],
         rate_limit_per_sec: 1,
-        api_keys_active: 1
+        api_keys_active: 1,
+        billing_hold: false,
+        daily_free_remaining: 7,
+        daily_free_limit: 10
       });
     }
   });
@@ -92,6 +104,48 @@ test("usage retries on 500 when retry is enabled", async () => {
 
   assert.equal(attempts, 2);
   assert.equal(response.credits_remaining, 7);
+});
+
+test("usage retries on network errors when retry is enabled", async () => {
+  let attempts = 0;
+
+  const client = cerul({
+    apiKey: "cerul_sk_test",
+    retry: true,
+    fetch: async () => {
+      attempts += 1;
+      if (attempts < 2) {
+        throw new TypeError("socket hang up");
+      }
+
+      return jsonResponse({
+        tier: "free",
+        plan_code: "free",
+        period_start: "2026-04-01",
+        period_end: "2026-04-30",
+        credits_limit: 0,
+        credits_used: 2,
+        credits_remaining: 8,
+        wallet_balance: 8,
+        credit_breakdown: {
+          included_remaining: 0,
+          bonus_remaining: 8,
+          paid_remaining: 0
+        },
+        expiring_credits: [],
+        rate_limit_per_sec: 1,
+        api_keys_active: 1,
+        billing_hold: false,
+        daily_free_remaining: 8,
+        daily_free_limit: 10
+      });
+    }
+  });
+
+  const response = await client.usage();
+
+  assert.equal(attempts, 2);
+  assert.equal(response.credits_remaining, 8);
 });
 
 test("search throws CerulError on timeout", async () => {

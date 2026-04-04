@@ -53,20 +53,20 @@ export interface ExpiringCredit {
 
 export interface UsageResponse {
   tier: string;
-  plan_code?: string;
+  plan_code: string;
   period_start: string;
   period_end: string;
   credits_limit: number;
   credits_used: number;
   credits_remaining: number;
-  wallet_balance?: number;
-  credit_breakdown?: CreditBreakdown;
-  expiring_credits?: ExpiringCredit[];
+  wallet_balance: number;
+  credit_breakdown: CreditBreakdown;
+  expiring_credits: ExpiringCredit[];
   rate_limit_per_sec: number;
   api_keys_active: number;
-  billing_hold?: boolean;
-  daily_free_remaining?: number;
-  daily_free_limit?: number;
+  billing_hold: boolean;
+  daily_free_remaining: number;
+  daily_free_limit: number;
 }
 
 export interface CerulClient {
