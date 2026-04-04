@@ -87,19 +87,23 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+const MAX_RETRY_DELAY_MS = 60_000;
+
 function parseRetryAfter(headerValue: string | null): number | null {
   if (!headerValue) {
     return null;
   }
+  let ms: number | null = null;
   const numeric = Number(headerValue);
   if (Number.isFinite(numeric) && numeric >= 0) {
-    return numeric * 1_000;
+    ms = numeric * 1_000;
+  } else {
+    const dateValue = Date.parse(headerValue);
+    if (Number.isFinite(dateValue)) {
+      ms = Math.max(dateValue - Date.now(), 0);
+    }
   }
-  const dateValue = Date.parse(headerValue);
-  if (Number.isFinite(dateValue)) {
-    return Math.max(dateValue - Date.now(), 0);
-  }
-  return null;
+  return ms != null ? Math.min(ms, MAX_RETRY_DELAY_MS) : null;
 }
 
 function defaultBackoffDelay(attempt: number): number {
