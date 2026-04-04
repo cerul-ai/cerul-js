@@ -1,11 +1,22 @@
-# cerul-js
+<div align="center">
+  <h1>cerul</h1>
+  <p><strong>The video search layer for AI agents — TypeScript SDK.</strong></p>
+  <p>Teach your AI agents to see. Search what was said, shown, or presented in any video.</p>
 
-Official TypeScript SDK for the Cerul video search API.
+  <p>
+    <a href="https://cerul.ai/docs"><strong>Docs</strong></a> &middot;
+    <a href="https://cerul.ai"><strong>Website</strong></a> &middot;
+    <a href="https://github.com/cerul-ai/cerul"><strong>Main Repo</strong></a>
+  </p>
 
-## Requirements
+  <p>
+    <a href="https://www.npmjs.com/package/cerul"><img alt="npm" src="https://img.shields.io/npm/v/cerul?style=flat-square&color=3b82f6" /></a>
+    <a href="./LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square" /></a>
+    <img alt="Node" src="https://img.shields.io/badge/node-18%2B-22c55e?style=flat-square" />
+  </p>
+</div>
 
-- Node.js 18+
-- A Cerul API key
+<br />
 
 ## Install
 
@@ -18,71 +29,67 @@ npm install cerul
 ```ts
 import { cerul } from "cerul";
 
-const client = cerul({
-  apiKey: process.env.CERUL_API_KEY,
-});
+const client = cerul(); // reads CERUL_API_KEY from env
 
-const result = await client.search({
-  query: "Sam Altman on AI video tools",
+const { results, answer } = await client.search({
+  query: "Sam Altman on AGI timeline",
   max_results: 5,
   include_answer: true,
-  filters: {
-    speaker: "Sam Altman",
-  },
+  filters: { speaker: "Sam Altman" },
 });
 
-console.log(result.results[0]?.title);
-
-const usage = await client.usage();
-console.log(`${usage.credits_used}/${usage.credits_limit}`);
+for (const r of results) {
+  console.log(`${r.title} (${r.score}) — ${r.url}`);
+}
 ```
 
-You can also omit `apiKey` and let the SDK read `CERUL_API_KEY` from the environment.
+## Features
+
+- **Zero dependencies** — native `fetch` only (Node 18+, Bun, Deno, Cloudflare Workers)
+- **Full TypeScript types** — `SearchRequest`, `SearchResponse`, `UsageResponse`, `CerulError`
+- **Timeout** — configurable via `AbortController`, default 30s
+- **Optional retry** — 429 reads `Retry-After`, 5xx exponential backoff, capped at 60s
+- **API key resolution** — parameter > `CERUL_API_KEY` env var
 
 ## Configuration
 
 ```ts
-import { cerul } from "cerul";
-
 const client = cerul({
-  apiKey: "cerul_sk_...",
-  baseUrl: "https://api.cerul.ai",
-  timeout: 30_000,
-  retry: false,
+  apiKey: "cerul_sk_...",       // or reads CERUL_API_KEY
+  timeout: 30_000,              // ms, default 30s
+  retry: true,                  // retry 429/5xx, default false
 });
 ```
 
-## API
+## Usage Monitoring
 
-### `client.search(request)`
-
-Search indexed videos using the public `POST /v1/search` endpoint.
-
-### `client.usage()`
-
-Fetch current credit balance and quota data from `GET /v1/usage`.
+```ts
+const usage = await client.usage();
+console.log(`${usage.credits_used} / ${usage.credits_remaining} credits`);
+```
 
 ## Errors
-
-API failures throw `CerulError`.
 
 ```ts
 import { CerulError, cerul } from "cerul";
 
 try {
-  await cerul().usage();
+  await cerul().search({ query: "test" });
 } catch (error) {
   if (error instanceof CerulError) {
-    console.error(error.status, error.code, error.requestId);
+    console.error(error.status, error.code, error.message);
   }
 }
 ```
 
-## Development
+## Ecosystem
 
-```bash
-npm install
-npm run test
-npm run build
-npm pack
-```
+| Package | Description |
+|---------|-------------|
+| [`cerul`](https://github.com/cerul-ai/cerul) | Main repo — API, docs, skills, remote MCP |
+| [`cerul`](https://pypi.org/project/cerul/) | Python SDK |
+| [`cerul-cli`](https://github.com/cerul-ai/cerul-cli) | CLI tool (Rust) |
+
+## License
+
+[MIT](./LICENSE)
