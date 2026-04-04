@@ -2,7 +2,7 @@ import { CerulError } from "./errors.js";
 import type { CerulClient, CerulOptions, SearchRequest, SearchResponse, UsageResponse } from "./types.js";
 import { SDK_VERSION } from "./version.js";
 
-const DEFAULT_BASE_URL = "https://api.cerul.ai";
+const BASE_URL = "https://api.cerul.ai";
 const DEFAULT_TIMEOUT_MS = 30_000;
 const MAX_RETRY_ATTEMPTS = 3;
 
@@ -16,10 +16,6 @@ function getEnvApiKey(): string | undefined {
     return maybeProcess.process.env.CERUL_API_KEY;
   }
   return undefined;
-}
-
-function normalizeBaseUrl(baseUrl: string | undefined): string {
-  return (baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, "");
 }
 
 function normalizeTimeout(timeout: number | undefined): number {
@@ -151,7 +147,7 @@ function shouldRetryResponse(response: Response, retryEnabled: boolean): boolean
 
 async function requestJson<T>(
   resolvedFetch: typeof fetch,
-  options: Required<Pick<CerulOptions, "retry">> & { apiKey: string; baseUrl: string; timeout: number },
+  options: Required<Pick<CerulOptions, "retry">> & { apiKey: string; timeout: number },
   path: string,
   init: RequestInit
 ): Promise<T> {
@@ -168,7 +164,7 @@ async function requestJson<T>(
     headers.set("user-agent", `cerul-js/${SDK_VERSION}`);
 
     try {
-      const response = await resolvedFetch(`${options.baseUrl}${path}`, {
+      const response = await resolvedFetch(`${BASE_URL}${path}`, {
         ...init,
         headers,
         signal: controller.signal
@@ -226,7 +222,6 @@ async function requestJson<T>(
 export function cerul(options: CerulOptions = {}): CerulClient {
   const resolvedFetch = requireFetch(options.fetch);
   const apiKey = requireApiKey(options.apiKey);
-  const baseUrl = normalizeBaseUrl(options.baseUrl);
   const timeout = normalizeTimeout(options.timeout);
   const retry = options.retry ?? false;
 
@@ -235,7 +230,7 @@ export function cerul(options: CerulOptions = {}): CerulClient {
       validateSearchRequest(request);
       return requestJson<SearchResponse>(
         resolvedFetch,
-        { apiKey, baseUrl, timeout, retry },
+        { apiKey, timeout, retry },
         "/v1/search",
         {
           method: "POST",
@@ -253,7 +248,7 @@ export function cerul(options: CerulOptions = {}): CerulClient {
     async usage(): Promise<UsageResponse> {
       return requestJson<UsageResponse>(
         resolvedFetch,
-        { apiKey, baseUrl, timeout, retry },
+        { apiKey, timeout, retry },
         "/v1/usage",
         {
           method: "GET"

@@ -76,7 +76,6 @@ export interface CerulClient {
 
 export interface CerulOptions {
   apiKey?: string;
-  baseUrl?: string;
   timeout?: number;
   retry?: boolean;
   fetch?: typeof fetch;
