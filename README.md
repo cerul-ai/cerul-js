@@ -5,80 +5,77 @@
   </a>
   <h1>Cerul TypeScript SDK</h1>
   <p><strong>The video search layer for AI agents.</strong></p>
-  <p>Teach your AI agents to see. Search what was said, shown, or presented in any video.</p>
-
-  <p>
-    <a href="https://cerul.ai/docs"><strong>Docs</strong></a> &middot;
-    <a href="https://cerul.ai"><strong>Website</strong></a> &middot;
-    <a href="https://github.com/cerul-ai/cerul"><strong>Main Repo</strong></a>
-  </p>
 
   <p>
     <a href="https://www.npmjs.com/package/cerul"><img alt="npm" src="https://img.shields.io/npm/v/cerul?style=flat-square&color=3b82f6" /></a>
     <a href="./LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square" /></a>
     <img alt="Node" src="https://img.shields.io/badge/node-18%2B-22c55e?style=flat-square" />
   </p>
+
+  <p>
+    <a href="https://cerul.ai/docs">Docs</a> &middot;
+    <a href="https://cerul.ai">Website</a> &middot;
+    <a href="https://github.com/cerul-ai/cerul">GitHub</a>
+  </p>
 </div>
 
 <br />
 
-## Install
+Search what was said, shown, or presented in any video — tech talks, podcasts, conference presentations, and earnings calls.
 
 ```bash
 npm install cerul
 ```
 
-## Quick Start
-
 ```ts
 import { cerul } from "cerul";
 
-const client = cerul(); // reads CERUL_API_KEY from env
+const client = cerul(); // reads CERUL_API_KEY
 
-const { results, answer } = await client.search({
-  query: "Sam Altman on AGI timeline",
-  max_results: 5,
-  include_answer: true,
-  filters: { speaker: "Sam Altman" },
-});
-
-for (const r of results) {
-  console.log(`${r.title} (${r.score}) — ${r.url}`);
+for (const r of (await client.search({ query: "Sam Altman on AGI timeline" })).results) {
+  console.log(r.title, r.url);
 }
 ```
 
-## Features
+Get a free API key at [cerul.ai/dashboard](https://cerul.ai/dashboard).
 
-- **Zero dependencies** — native `fetch` only (Node 18+, Bun, Deno, Cloudflare Workers)
-- **Full TypeScript types** — `SearchRequest`, `SearchResponse`, `UsageResponse`, `CerulError`
-- **Timeout** — configurable via `AbortController`, default 30s
-- **Optional retry** — 429 reads `Retry-After`, 5xx exponential backoff, capped at 60s
-- **API key resolution** — parameter > `CERUL_API_KEY` env var
+## Examples
+
+```ts
+// Search with filters
+const result = await client.search({
+  query: "Jensen Huang on AI infrastructure",
+  max_results: 5,
+  ranking_mode: "rerank",
+  include_answer: true,
+  filters: { speaker: "Jensen Huang", published_after: "2024-01-01" },
+});
+
+// AI-generated answer
+console.log(result.answer);
+
+// Check credits
+const usage = await client.usage();
+console.log(`${usage.credits_remaining} credits remaining`);
+```
 
 ## Configuration
 
 ```ts
 const client = cerul({
-  apiKey: "cerul_sk_...",       // or reads CERUL_API_KEY
-  timeout: 30_000,              // ms, default 30s
-  retry: true,                  // retry 429/5xx, default false
+  apiKey: "cerul_sk_...",   // or CERUL_API_KEY env var
+  timeout: 30_000,          // default 30s
+  retry: true,              // retry 429/5xx/network errors
 });
 ```
 
-## Usage Monitoring
+## Error handling
 
 ```ts
-const usage = await client.usage();
-console.log(`${usage.credits_used} / ${usage.credits_remaining} credits`);
-```
-
-## Errors
-
-```ts
-import { CerulError, cerul } from "cerul";
+import { CerulError } from "cerul";
 
 try {
-  await cerul().search({ query: "test" });
+  await client.search({ query: "test" });
 } catch (error) {
   if (error instanceof CerulError) {
     console.error(error.status, error.code, error.message);
@@ -86,13 +83,18 @@ try {
 }
 ```
 
-## Ecosystem
+## Features
 
-| Package | Description |
-|---------|-------------|
-| [`cerul`](https://github.com/cerul-ai/cerul) | Main repo — API, docs, skills, remote MCP |
-| [`cerul`](https://pypi.org/project/cerul/) | Python SDK |
-| [`cerul-cli`](https://github.com/cerul-ai/cerul-cli) | CLI tool (Rust) |
+- **Zero dependencies** — native `fetch` (Node 18+, Bun, Deno, Cloudflare Workers)
+- **Full TypeScript types** — complete type definitions included
+- **Retry with backoff** — 429 reads `Retry-After` (capped 60s), 5xx exponential backoff
+- **Network error retry** — timeouts and connection errors also retried when `retry: true`
+
+## Links
+
+- [Python SDK](https://pypi.org/project/cerul/) — `pip install cerul`
+- [CLI](https://github.com/cerul-ai/cerul-cli) — `curl -fsSL .../install.sh | bash`
+- [Main repo](https://github.com/cerul-ai/cerul) — API, docs, skills, remote MCP
 
 ## License
 
