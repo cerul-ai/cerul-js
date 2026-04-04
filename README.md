@@ -1,6 +1,10 @@
 <div align="center">
-  <h1>cerul</h1>
-  <p><strong>The video search layer for AI agents — TypeScript SDK.</strong></p>
+  <br />
+  <a href="https://cerul.ai">
+    <img src="https://raw.githubusercontent.com/cerul-ai/cerul/main/assets/logo.png" alt="Cerul" width="80" />
+  </a>
+  <h1>Cerul TypeScript SDK</h1>
+  <p><strong>The video search layer for AI agents.</strong></p>
   <p>Teach your AI agents to see. Search what was said, shown, or presented in any video.</p>
 
   <p>
