@@ -29,6 +29,8 @@ export interface SearchResult {
   speaker?: string | null;
   timestamp_start?: number | null;
   timestamp_end?: number | null;
+  published_at?: string | null;
+  language?: string | null;
 }
 
 export interface SearchResponse {
