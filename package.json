@@ -1,6 +1,6 @@
 {
   "name": "cerul",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "The video search layer for AI agents — TypeScript SDK",
   "type": "module",
   "main": "./dist/index.js",
